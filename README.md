@@ -1,3 +1,5 @@
+![svelte-keyed-banner](https://user-images.githubusercontent.com/42545742/145455110-0d90603a-5fb3-453a-a9ea-7c4e3b443913.png)
+
 # svelte-keyed
 
 [![npm version](http://img.shields.io/npm/v/svelte-keyed.svg)](https://www.npmjs.com/package/svelte-keyed)
@@ -9,14 +11,22 @@
 
 A **writable** derived store for objects and arrays!
 
+### Objects are `keyed`
+
 ```js
 const name = writable({ first: "Rich", last: "Harris" });
 const firstName = keyed(name, "first");
+
 $firstName = "Bryan";
 console.log($name); // { first: "Bryan", last: "Harris" };
+```
 
+### Arrays are `indexed`
+
+```js
 const history = writable(["one", "two", "three"]);
 const previousEdit = indexed(history, 1);
+
 $previousEdit = "four";
 console.log($history); // ["one", "four", "three"];
 ```
