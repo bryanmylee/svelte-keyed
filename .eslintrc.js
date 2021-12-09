@@ -11,17 +11,6 @@ module.exports = {
   },
   plugins: ["@typescript-eslint"],
   rules: {
-    indent: [
-      "error",
-      2,
-      {
-        MemberExpression: 2,
-        SwitchCase: 1,
-        FunctionDeclaration: {
-          parameters: 2,
-        },
-      },
-    ],
     "linebreak-style": ["error", "unix"],
     semi: ["error", "always"],
     "import/no-extraneous-dependencies": ["off"],

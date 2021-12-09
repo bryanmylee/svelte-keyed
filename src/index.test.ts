@@ -39,28 +39,28 @@ describe("keyed object test", () => {
 
   describe("undefined", () => {
     it("handles undefined subscription", () => {
-      const parent = writable<Name>(undefined);
-      const child = keyed(parent, "first");
+      const parent = writable<Name | undefined>(undefined);
+      const child = keyed<Name>(parent, "first");
       expect(get(child)).toBeUndefined();
     });
 
     it("handles undefined parent update", () => {
-      const parent = writable<Name>(undefined);
-      const child = keyed(parent, "first");
+      const parent = writable<Name | undefined>(undefined);
+      const child = keyed<Name>(parent, "first");
       parent.update(($parent) => $parent);
       expect(get(child)).toBeUndefined();
     });
 
     it("handles undefined parent child update", () => {
-      const parent = writable<Name>(undefined);
-      const child = keyed(parent, "first");
-      child.update(($child) => $child.toUpperCase());
+      const parent = writable<Name | undefined>(undefined);
+      const child = keyed<Name>(parent, "first");
+      child.update(($child) => $child?.toUpperCase());
       expect(get(parent)).toBeUndefined();
     });
 
     it("handles undefined parent child set", () => {
-      const parent = writable<Name>(undefined);
-      const child = keyed(parent, "first");
+      const parent = writable<Name | undefined>(undefined);
+      const child = keyed<Name>(parent, "first");
       child.set("jane");
       expect(get(parent)).toBeUndefined();
     });
@@ -104,34 +104,34 @@ describe("indexed array test", () => {
 
   describe("undefined", () => {
     it("handles undefined subscription", () => {
-      const parent = writable<string[]>(undefined);
+      const parent = writable<string[] | undefined>(undefined);
       const child = indexed(parent, 2);
       expect(get(child)).toBeUndefined();
     });
 
     it("handles undefined parent update", () => {
-      const parent = writable<string[]>(undefined);
+      const parent = writable<string[] | undefined>(undefined);
       const child = indexed(parent, 2);
       parent.update(($parent) => $parent);
       expect(get(child)).toBeUndefined();
     });
 
     it("handles undefined parent child update", () => {
-      const parent = writable<string[]>(undefined);
+      const parent = writable<string[] | undefined>(undefined);
       const child = indexed(parent, 2);
       child.update(($child) => $child?.toUpperCase());
       expect(get(parent)).toBeUndefined();
     });
 
     it("handles undefined parent child set", () => {
-      const parent = writable<string[]>(undefined);
+      const parent = writable<string[] | undefined>(undefined);
       const child = indexed(parent, 2);
       child.set("five");
       expect(get(parent)).toBeUndefined();
     });
 
     it("handles undefined parent out of bounds", () => {
-      const parent = writable<string[]>(undefined);
+      const parent = writable<string[] | undefined>(undefined);
       const child = indexed(parent, 2);
       parent.set(["five", "six"]);
       expect(get(child)).toBeUndefined();

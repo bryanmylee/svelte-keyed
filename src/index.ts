@@ -1,14 +1,23 @@
 import { derived } from "svelte/store";
-import type { Readable, Updater, Writable } from "svelte/store";
+import type { Updater, Writable } from "svelte/store";
 
-export const keyed = <Parent>(
+export function keyed<Parent>(
   parent: Writable<Parent>,
   key: keyof Parent
-): Writable<Parent[keyof Parent]> => {
+): Writable<Parent[keyof Parent]>;
+export function keyed<Parent>(
+  parent: Writable<Parent | undefined | null>,
+  key: keyof Parent
+): Writable<Parent[keyof Parent] | undefined>;
+
+export function keyed<Parent>(
+  parent: Writable<Parent | undefined | null>,
+  key: keyof Parent
+): Writable<Parent[keyof Parent] | undefined | null> {
   type Child = Parent[keyof Parent];
 
-  const keyedValue = derived<Readable<Parent>, Child>(parent, ($parent) => {
-    if ($parent === undefined) {
+  const keyedValue = derived(parent, ($parent) => {
+    if ($parent == null) {
       return undefined as unknown as Child;
     }
     return $parent[key];
@@ -16,8 +25,8 @@ export const keyed = <Parent>(
 
   const set = (value: Child) => {
     parent.update(($parent) => {
-      if ($parent === undefined) {
-        return $parent;
+      if ($parent == null) {
+        return undefined as unknown as Parent;
       }
       return {
         ...$parent,
@@ -28,8 +37,8 @@ export const keyed = <Parent>(
 
   const update = (fn: Updater<Child>) => {
     parent.update(($parent) => {
-      if ($parent === undefined) {
-        return $parent;
+      if ($parent == null) {
+        return undefined as unknown as Parent;
       }
       const newValue = fn($parent[key]);
       return {
@@ -44,14 +53,23 @@ export const keyed = <Parent>(
     set,
     update,
   };
-};
+}
 
-export const indexed = <Element>(
+export function indexed<Element>(
   array: Writable<Element[]>,
   index: number
-): Writable<Element | undefined> => {
+): Writable<Element | undefined>;
+export function indexed<Element>(
+  array: Writable<Element[] | undefined | null>,
+  index: number
+): Writable<Element | undefined>;
+
+export function indexed<Element>(
+  array: Writable<Element[] | undefined | null>,
+  index: number
+): Writable<Element | undefined> {
   const keyedValue = derived(array, ($array) => {
-    if ($array === undefined) {
+    if ($array == null) {
       return undefined as unknown as Element;
     }
     return $array[index];
@@ -59,8 +77,8 @@ export const indexed = <Element>(
 
   const set = (value: Element) => {
     array.update(($array) => {
-      if ($array === undefined) {
-        return $array;
+      if ($array == null) {
+        return undefined as unknown as Element[];
       }
       return [...$array.slice(0, index), value, ...$array.slice(index + 1)];
     });
@@ -68,8 +86,8 @@ export const indexed = <Element>(
 
   const update = (fn: Updater<Element>) => {
     array.update(($array) => {
-      if ($array === undefined) {
-        return $array;
+      if ($array == null) {
+        return undefined as unknown as Element[];
       }
       const newValue = fn($array[index]);
       return [...$array.slice(0, index), newValue, ...$array.slice(index + 1)];
@@ -81,4 +99,4 @@ export const indexed = <Element>(
     set,
     update,
   };
-};
+}

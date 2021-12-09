@@ -44,3 +44,5 @@ Since Svelte automatically bundles all required dependencies, you only need to i
 `keyed` takes a writable object store and a property name, while `indexed` takes a writable array store and an index value.
 
 Both return a writable store whose **changes are reflected on the original store**.
+
+If the parent store is nullable, then the child store will also be nullable.
