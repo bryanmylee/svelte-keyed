@@ -14,21 +14,23 @@ A **writable** derived store for objects and arrays!
 ### Objects are `keyed`
 
 ```js
-const name = writable({ first: "Rich", last: "Harris" });
-const firstName = keyed(name, "first");
+const name = writable({ first: 'Rich', last: 'Harris' });
+const firstName = keyed(name, 'first');
 
-$firstName = "Bryan";
-console.log($name); // { first: "Bryan", last: "Harris" };
+$firstName = 'Bryan';
+
+console.log($name); // { first: 'Bryan', last: 'Harris' };
 ```
 
 ### Arrays are `indexed`
 
 ```js
-const history = writable(["one", "two", "three"]);
+const history = writable(['one', 'two', 'three']);
 const previousEdit = indexed(history, 1);
 
-$previousEdit = "four";
-console.log($history); // ["one", "four", "three"];
+$previousEdit = 'four';
+
+console.log($history); // ['one', 'four', 'three'];
 ```
 
 ## Installation
@@ -45,4 +47,13 @@ Since Svelte automatically bundles all required dependencies, you only need to i
 
 Both return a writable store whose **changes are reflected on the original store**.
 
+### Nullable parents
+
 If the parent store is nullable, then the child store will also be nullable.
+
+Due to Typescript limitations, if the parent store is nullable, specify the full type for `keyed` and `indexed`.
+
+```ts
+const name = writable<Name | undefined>(undefined);
+const firstName = keyed<Name>(name, 'first');
+```
