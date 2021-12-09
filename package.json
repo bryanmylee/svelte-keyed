@@ -1,6 +1,6 @@
 {
   "name": "svelte-keyed",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A writable derived store for objects and arrays",
   "main": "dist/index.js",
   "module": "dist/index.es.js",
