@@ -1,0 +1,51 @@
+{
+  "name": "svelte-keyed",
+  "version": "1.0.0",
+  "description": "A writable derived store for objects and arrays",
+  "main": "dist/index.js",
+  "module": "dist/index.es.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "prepare": "rollup -c && tsc",
+    "pretest": "eslint --ignore-path .gitignore .",
+    "test": "jest --collect-coverage",
+    "format": "prettier --write src"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/bryanmylee/svelte-keyed.git"
+  },
+  "keywords": [
+    "svelte",
+    "sveltejs",
+    "derived",
+    "store",
+    "rxjs"
+  ],
+  "author": "Bryan Lee",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/bryanmylee/svelte-keyed/issues"
+  },
+  "homepage": "https://github.com/bryanmylee/svelte-keyed#readme",
+  "peerDependencies": {
+    "svelte": "^3.44.2"
+  },
+  "devDependencies": {
+    "@rollup/plugin-typescript": "^5.0.2",
+    "@types/jest": "^27.0.3",
+    "@typescript-eslint/eslint-plugin": "^5.6.0",
+    "@typescript-eslint/parser": "^5.6.0",
+    "eslint": "^8.4.1",
+    "eslint-plugin-import": "^2.25.3",
+    "jest": "^27.4.3",
+    "prettier": "^2.5.1",
+    "rollup": "^2.61.0",
+    "ts-jest": "^27.1.1",
+    "tslib": "^2.0.0",
+    "typescript": "^4.5.2"
+  }
+}
