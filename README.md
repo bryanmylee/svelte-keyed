@@ -11,26 +11,13 @@
 
 A **writable** derived store for objects and arrays!
 
-### Objects are `keyed`
-
 ```js
-const name = writable({ first: "Rich", last: "Harris" });
-const firstName = keyed(name, "first");
+const user = writable({ name: { first: "Rich", last: "Harris" } });
+const firstName = keyed(user, "name.first");
 
 $firstName = "Bryan";
 
-console.log($name); // { first: 'Bryan', last: 'Harris' };
-```
-
-### Arrays are `indexed`
-
-```js
-const history = writable(["one", "two", "three"]);
-const previousEdit = indexed(history, 1);
-
-$previousEdit = "four";
-
-console.log($history); // ['one', 'four', 'three'];
+console.log($user); // { name: { first: 'Bryan', last: 'Harris' } };
 ```
 
 ## Installation
@@ -43,27 +30,25 @@ Since Svelte automatically bundles all required dependencies, you only need to i
 
 ## API
 
-`keyed` takes a writable object store and a property name, while `indexed` takes a writable array store and an index value.
-
-Both return a writable store whose **changes are reflected on the original store**.
+`keyed` takes a writable object store and a **keypath**, and returns a writable store whose _changes are reflected on the original store_.
 
 ### Nullable parents
 
 If the parent store is nullable, then the child store will also be nullable.
 
-Due to Typescript limitations, if the parent store is nullable, specify the full type for `keyed` and `indexed`.
-
 ```ts
-const name = writable<Name | undefined>(undefined);
-const firstName = keyed<Name>(name, "first");
+const user = writable<User | undefined>(undefined);
+const firstName = keyed(user, "name.first"); // string | undefined
 ```
 
 ### Nested objects
 
-`keyed` and `indexed` only derive one depth of properties or elements. To access nested objects, nest multiple `keyed` or `indexed` calls.
+To access a nested object, provide a keypath.
+
+Properties are accessed with dot notation, and arrays can be indexed with bracket notation.
 
 ```js
-const email = keyed(indexed(keyed(settings, "profiles"), 0), "email");
+const email = keyed(settings, "profiles[0].email");
 ```
 
 ## Motivations
