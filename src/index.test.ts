@@ -1,140 +1,170 @@
 import { get, writable } from "svelte/store";
-import { keyed, indexed } from ".";
+import { getTokens, keyed } from ".";
+
+interface User {
+  name: Name;
+  email: string;
+  age: number;
+}
 
 interface Name {
   first: string;
   last: string;
 }
 
-describe("keyed object test", () => {
+describe("get tokens", () => {
+  test("object properties", () => {
+    const result = getTokens("a.b.c");
+    expect(result).toStrictEqual(["a", "b", "c"]);
+  });
+
+  test("array indexing", () => {
+    const result = getTokens("[3]");
+    expect(result).toStrictEqual(["3"]);
+  });
+
+  test("consecutive array indexing", () => {
+    const result = getTokens("[3][4][6]");
+    expect(result).toStrictEqual(["3", "4", "6"]);
+  });
+
+  test("mixed", () => {
+    const result = getTokens("a[3].b.c[4][5]");
+    expect(result).toStrictEqual(["a", "3", "b", "c", "4", "5"]);
+  });
+});
+
+describe("shallow keyed object test", () => {
+  let user: User;
+  beforeEach(() => {
+    user = {
+      email: "john@email.com",
+      age: 10,
+      name: { first: "john", last: "smith" },
+    };
+  });
+
   it("subscribes to the correct value", () => {
-    const parent = writable<Name>({ first: "john", last: "smith" });
-    const child = keyed(parent, "first");
-    expect(get(child)).toBe("john");
+    const parent = writable(user);
+    const age = keyed(parent, "age");
+    const email = keyed(parent, "email");
+    expect(get(age)).toBe(10);
+    expect(get(email)).toBe("john@email.com");
   });
 
   it("updates when the parent updates", () => {
-    const parent = writable({ first: "john", last: "smith" });
-    const child = keyed(parent, "first");
-    parent.set({
-      first: "jane",
-      last: "doe",
-    });
-    expect(get(child)).toBe("jane");
+    const parent = writable(user);
+    const age = keyed(parent, "age");
+    parent.update(($parent) => ({
+      ...$parent,
+      age: 11,
+    }));
+    expect(get(age)).toBe(11);
   });
 
   it("updates parent when child is updated", () => {
-    const parent = writable({ first: "john", last: "smith" });
-    const child = keyed(parent, "first");
-    child.update(($child) => $child.toUpperCase());
-    expect(get(parent)).toStrictEqual({ first: "JOHN", last: "smith" });
+    const parent = writable(user);
+    const age = keyed(parent, "age");
+    age.update(($age) => $age + 1);
+    expect(get(parent)).toStrictEqual({ ...user, age: 11 });
   });
 
   it("updates parent when child is set", () => {
-    const parent = writable({ first: "john", last: "smith" });
-    const child = keyed(parent, "first");
-    child.set("jane");
-    expect(get(parent)).toStrictEqual({ first: "jane", last: "smith" });
+    const parent = writable(user);
+    const age = keyed(parent, "age");
+    age.set(11);
+    expect(get(parent)).toStrictEqual({ ...user, age: 11 });
   });
 
   describe("undefined", () => {
     it("handles undefined subscription", () => {
-      const parent = writable<Name | undefined>(undefined);
-      const child = keyed<Name>(parent, "first");
-      expect(get(child)).toBeUndefined();
+      const parent = writable<User | undefined>(undefined);
+      const age = keyed(parent, "age");
+      expect(get(age)).toBeUndefined();
     });
 
     it("handles undefined parent update", () => {
-      const parent = writable<Name | undefined>(undefined);
-      const child = keyed<Name>(parent, "first");
+      const parent = writable<User | undefined>(undefined);
+      const age = keyed(parent, "age");
       parent.update(($parent) => $parent);
-      expect(get(child)).toBeUndefined();
+      expect(get(age)).toBeUndefined();
     });
 
     it("handles undefined parent child update", () => {
-      const parent = writable<Name | undefined>(undefined);
-      const child = keyed<Name>(parent, "first");
-      child.update(($child) => $child?.toUpperCase());
+      const parent = writable<User | undefined>(undefined);
+      const age = keyed(parent, "age");
+      age.update(($age) => ($age !== undefined ? $age + 1 : 0));
       expect(get(parent)).toBeUndefined();
     });
 
     it("handles undefined parent child set", () => {
-      const parent = writable<Name | undefined>(undefined);
-      const child = keyed<Name>(parent, "first");
-      child.set("jane");
+      const parent = writable<User | undefined>(undefined);
+      const age = keyed(parent, "age");
+      age.set(10);
       expect(get(parent)).toBeUndefined();
     });
   });
 });
 
-describe("indexed array test", () => {
+describe("shallow keyed array test", () => {
+  let actions: string[];
+  beforeEach(() => {
+    actions = ["eat", "sleep", "code", "repeat"];
+  });
+
   it("subscribes to the correct value", () => {
-    const parent = writable(["one", "two", "three", "four"]);
-    const child = indexed(parent, 2);
-    expect(get(child)).toBe("three");
+    const parent = writable(actions);
+    const action = keyed(parent, "[2]");
+    expect(get(action)).toBe("code");
   });
 
   it("updates when the parent updates", () => {
-    const parent = writable(["one", "two", "three", "four"]);
-    const child = indexed(parent, 2);
-    parent.set(["five", "six", "seven", "eight"]);
-    expect(get(child)).toBe("seven");
+    const parent = writable(actions);
+    const action = keyed(parent, "[2]");
+    parent.set(["eat", "sleep", "sleep", "repeat"]);
+    expect(get(action)).toBe("sleep");
   });
 
   it("updates parent when child is updated", () => {
-    const parent = writable(["one", "two", "three", "four"]);
-    const child = indexed(parent, 2);
-    child.update(($child) => $child?.toUpperCase());
-    expect(get(parent)).toStrictEqual(["one", "two", "THREE", "four"]);
+    const parent = writable(actions);
+    const action = keyed(parent, "[2]");
+    action.update(($action) => $action.toUpperCase());
+    expect(get(parent)).toStrictEqual(["eat", "sleep", "CODE", "repeat"]);
   });
 
   it("updates parent when child is set", () => {
-    const parent = writable(["one", "two", "three", "four"]);
-    const child = indexed(parent, 2);
-    child.set("five");
-    expect(get(parent)).toStrictEqual(["one", "two", "five", "four"]);
-  });
-
-  it("returns undefined if index becomes out of bounds", () => {
-    const parent = writable(["one", "two", "three", "four"]);
-    const child = indexed(parent, 2);
-    parent.set(["five", "six"]);
-    expect(get(child)).toBeUndefined();
+    const parent = writable(actions);
+    const action = keyed(parent, "[2]");
+    action.set("sleep");
+    expect(get(parent)).toStrictEqual(["eat", "sleep", "sleep", "repeat"]);
   });
 
   describe("undefined", () => {
     it("handles undefined subscription", () => {
       const parent = writable<string[] | undefined>(undefined);
-      const child = indexed(parent, 2);
-      expect(get(child)).toBeUndefined();
+      const action = keyed(parent, "[2]");
+      expect(get(action)).toBeUndefined();
     });
 
     it("handles undefined parent update", () => {
       const parent = writable<string[] | undefined>(undefined);
-      const child = indexed(parent, 2);
+      const action = keyed(parent, "[2]");
       parent.update(($parent) => $parent);
-      expect(get(child)).toBeUndefined();
+      expect(get(action)).toBeUndefined();
     });
 
     it("handles undefined parent child update", () => {
       const parent = writable<string[] | undefined>(undefined);
-      const child = indexed(parent, 2);
-      child.update(($child) => $child?.toUpperCase());
+      const action = keyed(parent, "[2]");
+      action.update(($action) => $action?.toUpperCase());
       expect(get(parent)).toBeUndefined();
     });
 
     it("handles undefined parent child set", () => {
       const parent = writable<string[] | undefined>(undefined);
-      const child = indexed(parent, 2);
-      child.set("five");
+      const action = keyed(parent, "[2]");
+      action.set("sleep");
       expect(get(parent)).toBeUndefined();
-    });
-
-    it("handles undefined parent out of bounds", () => {
-      const parent = writable<string[] | undefined>(undefined);
-      const child = indexed(parent, 2);
-      parent.set(["five", "six"]);
-      expect(get(child)).toBeUndefined();
     });
   });
 });
