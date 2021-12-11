@@ -168,3 +168,84 @@ describe("shallow keyed array test", () => {
     });
   });
 });
+
+describe("nested keyed object test", () => {
+  let user: User;
+  beforeEach(() => {
+    user = {
+      email: "john@email.com",
+      age: 10,
+      name: { first: "john", last: "smith" },
+    };
+  });
+
+  it("subscribes to the correct value", () => {
+    const parent = writable(user);
+    const firstName = keyed(parent, "name.first");
+    const lastName = keyed(parent, "name.last");
+    expect(get(firstName)).toBe("john");
+    expect(get(lastName)).toBe("smith");
+  });
+
+  it("updates when the parent updates", () => {
+    const parent = writable(user);
+    const firstName = keyed(parent, "name.first");
+    parent.update(($parent) => ({
+      ...$parent,
+      name: {
+        first: "jane",
+        last: "doe",
+      },
+    }));
+    expect(get(firstName)).toBe("jane");
+  });
+
+  it("updates parent when child is updated", () => {
+    const parent = writable(user);
+    const firstName = keyed(parent, "name.first");
+    firstName.update(($firstName) => $firstName.toUpperCase());
+    expect(get(parent)).toStrictEqual({
+      ...user,
+      name: { ...user.name, first: "JOHN" },
+    });
+  });
+
+  it("updates parent when child is set", () => {
+    const parent = writable(user);
+    const firstName = keyed(parent, "name.first");
+    firstName.set("jane");
+    expect(get(parent)).toStrictEqual({
+      ...user,
+      name: { ...user.name, first: "jane" },
+    });
+  });
+
+  describe("undefined", () => {
+    it("handles undefined subscription", () => {
+      const parent = writable<User | undefined>(undefined);
+      const firstName = keyed(parent, "name.first");
+      expect(get(firstName)).toBeUndefined();
+    });
+
+    it("handles undefined parent update", () => {
+      const parent = writable<User | undefined>(undefined);
+      const firstName = keyed(parent, "name.first");
+      parent.update(($parent) => $parent);
+      expect(get(firstName)).toBeUndefined();
+    });
+
+    it("handles undefined parent child update", () => {
+      const parent = writable<User | undefined>(undefined);
+      const firstName = keyed(parent, "name.first");
+      firstName.update(($firstName) => $firstName?.toUpperCase());
+      expect(get(parent)).toBeUndefined();
+    });
+
+    it("handles undefined parent child set", () => {
+      const parent = writable<User | undefined>(undefined);
+      const firstName = keyed(parent, "name.first");
+      firstName.set("jane");
+      expect(get(parent)).toBeUndefined();
+    });
+  });
+});
