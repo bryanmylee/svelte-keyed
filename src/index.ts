@@ -1,96 +1,69 @@
 import { derived } from "svelte/store";
 import type { Updater, Writable } from "svelte/store";
+import { Get } from "type-fest";
 
-export function keyed<Parent>(
+export const getTokens = (key: string): string[] => {
+  let keyWithoutBracket = key.replace(/\[(\d+)\]/g, ".$1");
+  if (keyWithoutBracket.startsWith(".")) {
+    keyWithoutBracket = keyWithoutBracket.slice(1);
+  }
+  return keyWithoutBracket.split(".");
+};
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const getNested = (root: unknown, keyTokens: string[]): any => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let current: any = root;
+  for (const key of keyTokens) {
+    if (current == null) {
+      break;
+    }
+    current = current[key];
+  }
+  return current;
+};
+
+export function keyed<Parent, Key extends string>(
   parent: Writable<Parent>,
-  key: keyof Parent
-): Writable<Parent[keyof Parent]>;
-export function keyed<Parent>(
+  key: Key
+): Writable<Get<Parent, Key>>;
+export function keyed<Parent, Key extends string>(
   parent: Writable<Parent | undefined | null>,
-  key: keyof Parent
-): Writable<Parent[keyof Parent] | undefined>;
+  key: Key
+): Writable<Get<Parent, Key> | undefined>;
 
-export function keyed<Parent>(
+export function keyed<Parent, Key extends string>(
   parent: Writable<Parent | undefined | null>,
-  key: keyof Parent
-): Writable<Parent[keyof Parent] | undefined | null> {
-  type Child = Parent[keyof Parent];
+  key: Key
+): Writable<Get<Parent, Key> | undefined> {
+  const keyTokens = getTokens(key);
+  const branchTokens = keyTokens.slice(0, keyTokens.length - 1);
+  const leafToken = keyTokens[keyTokens.length - 1];
 
-  const keyedValue = derived(parent, ($parent) => {
-    if ($parent == null) {
-      return undefined as unknown as Child;
-    }
-    return $parent[key];
-  });
+  const keyedValue = derived(parent, ($parent) =>
+    getNested($parent, keyTokens)
+  );
 
-  const set = (value: Child) => {
+  const set = (value: Get<Parent, Key>) => {
     parent.update(($parent) => {
       if ($parent == null) {
         return undefined as unknown as Parent;
       }
-      return {
-        ...$parent,
-        [key]: value,
-      };
+      const newParent = Array.isArray($parent) ? [...$parent] : { ...$parent };
+      getNested(newParent, branchTokens)[leafToken] = value;
+      return newParent as Parent;
     });
   };
 
-  const update = (fn: Updater<Child>) => {
+  const update = (fn: Updater<Get<Parent, Key>>) => {
     parent.update(($parent) => {
       if ($parent == null) {
         return undefined as unknown as Parent;
       }
-      const newValue = fn($parent[key]);
-      return {
-        ...$parent,
-        [key]: newValue,
-      };
-    });
-  };
-
-  return {
-    subscribe: keyedValue.subscribe,
-    set,
-    update,
-  };
-}
-
-export function indexed<Element>(
-  array: Writable<Element[]>,
-  index: number
-): Writable<Element | undefined>;
-export function indexed<Element>(
-  array: Writable<Element[] | undefined | null>,
-  index: number
-): Writable<Element | undefined>;
-
-export function indexed<Element>(
-  array: Writable<Element[] | undefined | null>,
-  index: number
-): Writable<Element | undefined> {
-  const keyedValue = derived(array, ($array) => {
-    if ($array == null) {
-      return undefined as unknown as Element;
-    }
-    return $array[index];
-  });
-
-  const set = (value: Element) => {
-    array.update(($array) => {
-      if ($array == null) {
-        return undefined as unknown as Element[];
-      }
-      return [...$array.slice(0, index), value, ...$array.slice(index + 1)];
-    });
-  };
-
-  const update = (fn: Updater<Element>) => {
-    array.update(($array) => {
-      if ($array == null) {
-        return undefined as unknown as Element[];
-      }
-      const newValue = fn($array[index]);
-      return [...$array.slice(0, index), newValue, ...$array.slice(index + 1)];
+      const newValue = fn(getNested($parent, keyTokens));
+      const newParent = Array.isArray($parent) ? [...$parent] : { ...$parent };
+      getNested(newParent, branchTokens)[leafToken] = newValue;
+      return newParent as Parent;
     });
   };
 
