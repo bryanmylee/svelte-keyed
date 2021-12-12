@@ -12,10 +12,10 @@
 A **writable** derived store for objects and arrays!
 
 ```js
-const user = writable({ name: { first: "Rich", last: "Harris" } });
-const firstName = keyed(user, "name.first");
+const user = writable({ name: { first: 'Rich', last: 'Harris' } });
+const firstName = keyed(user, 'name.first');
 
-$firstName = "Bryan";
+$firstName = 'Bryan';
 
 console.log($user); // { name: { first: 'Bryan', last: 'Harris' } };
 ```
@@ -38,7 +38,7 @@ If the parent store is nullable, then the child store will also be nullable.
 
 ```ts
 const user = writable<User | undefined>(undefined);
-const firstName = keyed(user, "name.first"); // string | undefined
+const firstName = keyed(user, 'name.first'); // string | undefined
 ```
 
 ### Nested objects
@@ -48,7 +48,7 @@ To access a nested object, provide a keypath.
 Properties are accessed with dot notation, and arrays can be indexed with bracket notation.
 
 ```js
-const email = keyed(settings, "profiles[0].email");
+const email = keyed(settings, 'profiles[0].email');
 ```
 
 ## Motivations
@@ -101,14 +101,14 @@ One important method to reduce clutter on your component is to extract functiona
 
 ```js
 export const trackClicks = (node, clicks) => {
-  const listen = () => {
-    clicks.update(($clicks) => $clicks + 1);
-  };
-  node.addEventListener("click", listen);
-  return {
-    destroy() {
-      node.removeEventListener("click", listen);
-    },
-  };
+	const listen = () => {
+		clicks.update(($clicks) => $clicks + 1);
+	};
+	node.addEventListener('click', listen);
+	return {
+		destroy() {
+			node.removeEventListener('click', listen);
+		},
+	};
 };
 ```
