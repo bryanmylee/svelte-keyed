@@ -101,14 +101,14 @@ One important method to reduce clutter on your component is to extract functiona
 
 ```js
 export const trackClicks = (node, clicks) => {
-	const listen = () => {
-		clicks.update(($clicks) => $clicks + 1);
-	};
-	node.addEventListener('click', listen);
-	return {
-		destroy() {
-			node.removeEventListener('click', listen);
-		},
-	};
+  const listen = () => {
+    clicks.update(($clicks) => $clicks + 1);
+  };
+  node.addEventListener('click', listen);
+  return {
+    destroy() {
+      node.removeEventListener('click', listen);
+    },
+  };
 };
 ```
