@@ -249,3 +249,18 @@ describe('nested keyed object test', () => {
 		});
 	});
 });
+
+describe('prevent prototype pollution', () => {
+	it('throws an error if any key contains "__proto__"', () => {
+		const parent = writable({});
+		expect(() => {
+			keyed(parent, '__proto__');
+		}).toThrowError('key cannot include "__proto__"');
+		expect(() => {
+			keyed(parent, '__proto__.name');
+		}).toThrowError('key cannot include "__proto__"');
+		expect(() => {
+			keyed(parent, 'name.__proto__');
+		}).toThrowError('key cannot include "__proto__"');
+	});
+});

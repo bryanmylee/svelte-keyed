@@ -27,6 +27,7 @@ export function keyed<Parent, Key extends string>(
 	parent: Writable<Parent>,
 	key: Key
 ): Writable<Get<Parent, Key>>;
+
 export function keyed<Parent, Key extends string>(
 	parent: Writable<Parent | undefined | null>,
 	key: Key
@@ -37,6 +38,9 @@ export function keyed<Parent, Key extends string>(
 	key: Key
 ): Writable<Get<Parent, Key> | undefined> {
 	const keyTokens = getTokens(key);
+	if (keyTokens.some((token) => token === '__proto__')) {
+		throw new Error('key cannot include "__proto__"');
+	}
 	const branchTokens = keyTokens.slice(0, keyTokens.length - 1);
 	const leafToken = keyTokens[keyTokens.length - 1];
 
