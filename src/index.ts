@@ -23,17 +23,23 @@ const getNested = (root: unknown, keyTokens: string[]): any => {
 	return current;
 };
 
-export function keyed<Parent, Key extends string>(
+const clonedWithPrototype = <T extends object>(source: T): T => {
+	const clone = Object.create(source);
+	Object.assign(clone, source);
+	return clone;
+};
+
+export function keyed<Parent extends object, Key extends string>(
 	parent: Writable<Parent>,
 	key: Key
 ): Writable<Get<Parent, Key>>;
 
-export function keyed<Parent, Key extends string>(
+export function keyed<Parent extends object, Key extends string>(
 	parent: Writable<Parent | undefined | null>,
 	key: Key
 ): Writable<Get<Parent, Key> | undefined>;
 
-export function keyed<Parent, Key extends string>(
+export function keyed<Parent extends object, Key extends string>(
 	parent: Writable<Parent | undefined | null>,
 	key: Key
 ): Writable<Get<Parent, Key> | undefined> {
@@ -53,7 +59,9 @@ export function keyed<Parent, Key extends string>(
 			if ($parent == null) {
 				return undefined as unknown as Parent;
 			}
-			const newParent = Array.isArray($parent) ? [...$parent] : { ...$parent };
+			const newParent = Array.isArray($parent)
+				? [...$parent]
+				: clonedWithPrototype($parent);
 			getNested(newParent, branchTokens)[leafToken] = value;
 			return newParent as Parent;
 		});
@@ -65,7 +73,9 @@ export function keyed<Parent, Key extends string>(
 				return undefined as unknown as Parent;
 			}
 			const newValue = fn(getNested($parent, keyTokens));
-			const newParent = Array.isArray($parent) ? [...$parent] : { ...$parent };
+			const newParent = Array.isArray($parent)
+				? [...$parent]
+				: clonedWithPrototype($parent);
 			getNested(newParent, branchTokens)[leafToken] = newValue;
 			return newParent as Parent;
 		});

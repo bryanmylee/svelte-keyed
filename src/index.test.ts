@@ -12,6 +12,14 @@ interface Name {
 	last: string;
 }
 
+class UserC {
+	constructor(public name: NameC, public email: string, public age: number) {}
+}
+
+class NameC {
+	constructor(public first: string, public last: string) {}
+}
+
 describe('get tokens', () => {
 	test('object properties', () => {
 		const result = getTokens('a.b.c');
@@ -262,5 +270,31 @@ describe('prevent prototype pollution', () => {
 		expect(() => {
 			keyed(parent, 'name.__proto__');
 		}).toThrowError('key cannot include "__proto__"');
+	});
+});
+
+describe('keyed classes', () => {
+	let user: UserC;
+	beforeEach(() => {
+		const name = new NameC('john', 'smith');
+		user = new UserC(name, 'john@email.com', 10);
+	});
+
+	it('retains the parent prototype', () => {
+		const parent = writable(user);
+		const age = keyed(parent, 'age');
+		const firstName = keyed(parent, 'name.first');
+		firstName.set('jane');
+		age.set(11);
+		expect(get(parent)).toBeInstanceOf(UserC);
+	});
+
+	it('retains the nested child prototype', () => {
+		const parent = writable(user);
+		const age = keyed(parent, 'age');
+		const firstName = keyed(parent, 'name.first');
+		firstName.set('jane');
+		age.set(11);
+		expect(get(parent).name).toBeInstanceOf(NameC);
 	});
 });
