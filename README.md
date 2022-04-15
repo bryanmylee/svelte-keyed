@@ -32,23 +32,75 @@ Since Svelte automatically bundles all required dependencies, you only need to i
 
 `keyed` takes a writable object store and a **keypath**, and returns a writable store whose _changes are reflected on the original store_.
 
+Properties are accessed with dot notation, and arrays can be indexed with bracket notation.
+
+```js
+const email = keyed(settings, 'profiles[0].email');
+```
+
 ### Nullable parents
 
 If the parent store is nullable, then the child store will also be nullable.
 
 ```ts
-const user = writable<User | undefined>(undefined);
-const firstName = keyed(user, 'name.first'); // string | undefined
+type User = {
+	name: {
+		first: string;
+		last: string;
+	};
+	relations: {
+		partner?: User;
+	};
+};
+
+const maybeUser = writable<User | undefined>(undefined);
+// Writable<string | undefined>
+const firstName = keyed(maybeUser, 'name.first');
 ```
 
-### Nested objects
+### Nullable properties
 
-To access a nested object, provide a keypath.
+Nullable properties are accessed with [optional chaining](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Optional_chaining) behaviour.
 
-Properties are accessed with dot notation, and arrays can be indexed with bracket notation.
+```ts
+const user = writable(initUser);
+// Writable<Name | undefined>
+const partnerName = keyed(user, 'relations.partner.name');
+```
 
-```js
-const email = keyed(settings, 'profiles[0].email');
+### TypeScript
+
+`keyed` infers the return type of the keyed store from the keypath.
+
+```ts
+const user = writable(initUser);
+// Writable<string>
+const firstName = keyed(user, 'name.first');
+```
+
+`keyed` will also try to guess all possible keypaths up to a depth limit of 3.
+
+```ts
+keyed(user, '...');
+            ┌───────────────────────────────┐
+            │ • name                        │
+            │ • name.first                  │
+            │ • name.last                   │
+            │ • name                        │
+            │ • relations                   │
+            │ • relations.partner           │
+            │ • relations.partner.name      │
+            └───────────────────────────────┘
+```
+
+_This limit is due to a TypeScript limitation where structured types must be generated statically. Increasing the depth limit slows down type compilation._
+
+Type hints will not be provided for keypaths with a depth greater than 3 but this does not affect the return type.
+
+```ts
+const user = writable(user);
+// Writable<string | undefined>
+const firstName = keyed(user, 'relations.partner.name.first');
 ```
 
 ## Motivations
@@ -101,14 +153,14 @@ One important method to reduce clutter on your component is to extract functiona
 
 ```js
 export const trackClicks = (node, clicks) => {
-  const listen = () => {
-    clicks.update(($clicks) => $clicks + 1);
-  };
-  node.addEventListener('click', listen);
-  return {
-    destroy() {
-      node.removeEventListener('click', listen);
-    },
-  };
+	const listen = () => {
+		clicks.update(($clicks) => $clicks + 1);
+	};
+	node.addEventListener('click', listen);
+	return {
+		destroy() {
+			node.removeEventListener('click', listen);
+		},
+	};
 };
 ```

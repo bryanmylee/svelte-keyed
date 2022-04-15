@@ -29,19 +29,19 @@ const clonedWithPrototype = <T extends object>(source: T): T => {
 	return clone;
 };
 
-export function keyed<Parent extends object, Path extends KeyPath<Parent>>(
+export function keyed<Parent extends object, Path extends string>(
 	parent: Writable<Parent>,
-	path: Path
+	path: Path | KeyPath<Parent>
 ): Writable<Get<Parent, Path>>;
 
-export function keyed<Parent extends object, Path extends KeyPath<Parent>>(
+export function keyed<Parent extends object, Path extends string>(
 	parent: Writable<Parent | undefined | null>,
-	path: Path
+	path: Path | KeyPath<Parent>
 ): Writable<Get<Parent, Path> | undefined>;
 
-export function keyed<Parent extends object, Path extends KeyPath<Parent>>(
+export function keyed<Parent extends object, Path extends string>(
 	parent: Writable<Parent | undefined | null>,
-	path: Path
+	path: Path | KeyPath<Parent>
 ): Writable<Get<Parent, Path> | undefined> {
 	const keyTokens = getTokens(path);
 	if (keyTokens.some((token) => token === '__proto__')) {
@@ -90,7 +90,7 @@ export function keyed<Parent extends object, Path extends KeyPath<Parent>>(
 
 // UTILITY TYPES
 // =============
-export type KeyPath<T, D extends number = 5> = KeyPath_<T, D, []>;
+type KeyPath<T, D extends number = 3> = KeyPath_<T, D, []>;
 
 type KeyPath_<T, D extends number, S extends unknown[]> = D extends S['length']
 	? never
