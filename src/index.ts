@@ -29,21 +29,21 @@ const clonedWithPrototype = <T extends object>(source: T): T => {
 	return clone;
 };
 
-export function keyed<Parent extends object, Key extends string>(
+export function keyed<Parent extends object, Path extends KeyPath<Parent>>(
 	parent: Writable<Parent>,
-	key: Key
-): Writable<Get<Parent, Key>>;
+	path: Path
+): Writable<Get<Parent, Path>>;
 
-export function keyed<Parent extends object, Key extends string>(
+export function keyed<Parent extends object, Path extends KeyPath<Parent>>(
 	parent: Writable<Parent | undefined | null>,
-	key: Key
-): Writable<Get<Parent, Key> | undefined>;
+	path: Path
+): Writable<Get<Parent, Path> | undefined>;
 
-export function keyed<Parent extends object, Key extends string>(
+export function keyed<Parent extends object, Path extends KeyPath<Parent>>(
 	parent: Writable<Parent | undefined | null>,
-	key: Key
-): Writable<Get<Parent, Key> | undefined> {
-	const keyTokens = getTokens(key);
+	path: Path
+): Writable<Get<Parent, Path> | undefined> {
+	const keyTokens = getTokens(path);
 	if (keyTokens.some((token) => token === '__proto__')) {
 		throw new Error('key cannot include "__proto__"');
 	}
@@ -54,7 +54,7 @@ export function keyed<Parent extends object, Key extends string>(
 		getNested($parent, keyTokens)
 	);
 
-	const set = (value: Get<Parent, Key>) => {
+	const set = (value: Get<Parent, Path>) => {
 		parent.update(($parent) => {
 			if ($parent == null) {
 				return undefined as unknown as Parent;
@@ -67,7 +67,7 @@ export function keyed<Parent extends object, Key extends string>(
 		});
 	};
 
-	const update = (fn: Updater<Get<Parent, Key>>) => {
+	const update = (fn: Updater<Get<Parent, Path>>) => {
 		parent.update(($parent) => {
 			if ($parent == null) {
 				return undefined as unknown as Parent;
@@ -87,3 +87,27 @@ export function keyed<Parent extends object, Key extends string>(
 		update,
 	};
 }
+
+// UTILITY TYPES
+// =============
+export type KeyPath<T, D extends number = 5> = KeyPath_<T, D, []>;
+
+type KeyPath_<T, D extends number, S extends unknown[]> = D extends S['length']
+	? never
+	: T extends object
+	? {
+			[K in keyof T]-?: K extends string
+				? `${K}` | Join<K, KeyPath_<T[K], D, [never, ...S]>>
+				: K extends number
+				? `[${K}]` | Join<`[${K}]`, KeyPath_<T[K], D, [never, ...S]>>
+				: never;
+	  }[keyof T]
+	: '';
+
+type Join<K, P> = K extends string | number
+	? P extends string | number
+		? P extends `[${string}`
+			? `${K}${P}`
+			: `${K}${'' extends P ? '' : '.'}${P}`
+		: never
+	: never;

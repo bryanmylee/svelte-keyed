@@ -262,13 +262,13 @@ describe('prevent prototype pollution', () => {
 	it('throws an error if any key contains "__proto__"', () => {
 		const parent = writable({});
 		expect(() => {
-			keyed(parent, '__proto__');
+			keyed(parent, '__proto__' as never);
 		}).toThrowError('key cannot include "__proto__"');
 		expect(() => {
-			keyed(parent, '__proto__.name');
+			keyed(parent, '__proto__.name' as never);
 		}).toThrowError('key cannot include "__proto__"');
 		expect(() => {
-			keyed(parent, 'name.__proto__');
+			keyed(parent, 'name.__proto__' as never);
 		}).toThrowError('key cannot include "__proto__"');
 	});
 });
