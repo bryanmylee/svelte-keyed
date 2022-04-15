@@ -5,6 +5,8 @@ interface User {
 	name: Name;
 	email: string;
 	age: number;
+	friend?: User;
+	partner: User | null;
 }
 
 interface Name {
@@ -21,22 +23,22 @@ class NameC {
 }
 
 describe('get tokens', () => {
-	test('object properties', () => {
+	it('converts a chain of object props', () => {
 		const result = getTokens('a.b.c');
 		expect(result).toStrictEqual(['a', 'b', 'c']);
 	});
 
-	test('array indexing', () => {
+	it('converts an array index', () => {
 		const result = getTokens('[3]');
 		expect(result).toStrictEqual(['3']);
 	});
 
-	test('consecutive array indexing', () => {
+	it('converts consecutive array indices', () => {
 		const result = getTokens('[3][4][6]');
 		expect(result).toStrictEqual(['3', '4', '6']);
 	});
 
-	test('mixed', () => {
+	it('converts a mix of array indices and object props', () => {
 		const result = getTokens('a[3].b.c[4][5]');
 		expect(result).toStrictEqual(['a', '3', 'b', 'c', '4', '5']);
 	});
@@ -49,10 +51,11 @@ describe('shallow keyed object test', () => {
 			email: 'john@email.com',
 			age: 10,
 			name: { first: 'john', last: 'smith' },
+			partner: null,
 		};
 	});
 
-	it('subscribes to the correct value', () => {
+	it('subscribes child to the correct value', () => {
 		const parent = writable(user);
 		const age = keyed(parent, 'age');
 		const email = keyed(parent, 'email');
@@ -60,7 +63,7 @@ describe('shallow keyed object test', () => {
 		expect(get(email)).toBe('john@email.com');
 	});
 
-	it('updates when the parent updates', () => {
+	it('updates child when parent updates', () => {
 		const parent = writable(user);
 		const age = keyed(parent, 'age');
 		parent.update(($parent) => ({
@@ -70,7 +73,7 @@ describe('shallow keyed object test', () => {
 		expect(get(age)).toBe(11);
 	});
 
-	it('updates parent when child is updated', () => {
+	it('updates parent when child updates', () => {
 		const parent = writable(user);
 		const age = keyed(parent, 'age');
 		age.update(($age) => $age + 1);
@@ -85,27 +88,40 @@ describe('shallow keyed object test', () => {
 	});
 
 	describe('undefined', () => {
-		it('handles undefined subscription', () => {
+		it('subscribes child to undefined when parent is undefined', () => {
 			const parent = writable<User | undefined>(undefined);
 			const age = keyed(parent, 'age');
 			expect(get(age)).toBeUndefined();
 		});
 
-		it('handles undefined parent update', () => {
+		it('subscribes child to undefined when parent is null', () => {
+			const parent = writable<User | null>(null);
+			const age = keyed(parent, 'age');
+			expect(get(age)).toBeUndefined();
+		});
+
+		it('subscribes child to the correct value when parent is no longer undefined', () => {
+			const parent = writable<User | undefined>(undefined);
+			const age = keyed(parent, 'age');
+			parent.set(user);
+			expect(get(age)).toBe(10);
+		});
+
+		it('does not update child when parent stays undefined', () => {
 			const parent = writable<User | undefined>(undefined);
 			const age = keyed(parent, 'age');
 			parent.update(($parent) => $parent);
 			expect(get(age)).toBeUndefined();
 		});
 
-		it('handles undefined parent child update', () => {
+		it('does not update parent when child updates', () => {
 			const parent = writable<User | undefined>(undefined);
 			const age = keyed(parent, 'age');
 			age.update(($age) => ($age !== undefined ? $age + 1 : 0));
 			expect(get(parent)).toBeUndefined();
 		});
 
-		it('handles undefined parent child set', () => {
+		it('does not update parent when child is set', () => {
 			const parent = writable<User | undefined>(undefined);
 			const age = keyed(parent, 'age');
 			age.set(10);
@@ -120,7 +136,7 @@ describe('shallow keyed array test', () => {
 		actions = ['eat', 'sleep', 'code', 'repeat'];
 	});
 
-	it('subscribes to the correct value', () => {
+	it('subscribes child to the correct value', () => {
 		const parent = writable(actions);
 		const action = keyed(parent, '[2]');
 		expect(get(action)).toBe('code');
@@ -147,28 +163,41 @@ describe('shallow keyed array test', () => {
 		expect(get(parent)).toStrictEqual(['eat', 'sleep', 'sleep', 'repeat']);
 	});
 
-	describe('undefined', () => {
-		it('handles undefined subscription', () => {
+	describe('undefined and null', () => {
+		it('subscribes child to undefined when parent is undefined', () => {
 			const parent = writable<string[] | undefined>(undefined);
 			const action = keyed(parent, '[2]');
 			expect(get(action)).toBeUndefined();
 		});
 
-		it('handles undefined parent update', () => {
+		it('subscribes child to undefined when parent is null', () => {
+			const parent = writable<string[] | null>(null);
+			const action = keyed(parent, '[2]');
+			expect(get(action)).toBeUndefined();
+		});
+
+		it('subscribes child to the correct value when parent is no longer undefined', () => {
+			const parent = writable<string[] | undefined>(undefined);
+			const action = keyed(parent, '[2]');
+			parent.set(actions);
+			expect(get(action)).toBe('code');
+		});
+
+		it('does not update child when parent stays undefined', () => {
 			const parent = writable<string[] | undefined>(undefined);
 			const action = keyed(parent, '[2]');
 			parent.update(($parent) => $parent);
 			expect(get(action)).toBeUndefined();
 		});
 
-		it('handles undefined parent child update', () => {
+		it('does not update parent when child updates', () => {
 			const parent = writable<string[] | undefined>(undefined);
 			const action = keyed(parent, '[2]');
 			action.update(($action) => $action?.toUpperCase());
 			expect(get(parent)).toBeUndefined();
 		});
 
-		it('handles undefined parent child set', () => {
+		it('does not update parent when child is set', () => {
 			const parent = writable<string[] | undefined>(undefined);
 			const action = keyed(parent, '[2]');
 			action.set('sleep');
@@ -184,10 +213,11 @@ describe('nested keyed object test', () => {
 			email: 'john@email.com',
 			age: 10,
 			name: { first: 'john', last: 'smith' },
+			partner: null,
 		};
 	});
 
-	it('subscribes to the correct value', () => {
+	it('subscribes child to the correct value', () => {
 		const parent = writable(user);
 		const firstName = keyed(parent, 'name.first');
 		const lastName = keyed(parent, 'name.last');
@@ -195,7 +225,7 @@ describe('nested keyed object test', () => {
 		expect(get(lastName)).toBe('smith');
 	});
 
-	it('updates when the parent updates', () => {
+	it('updates child when parent updates', () => {
 		const parent = writable(user);
 		const firstName = keyed(parent, 'name.first');
 		parent.update(($parent) => ({
@@ -208,7 +238,7 @@ describe('nested keyed object test', () => {
 		expect(get(firstName)).toBe('jane');
 	});
 
-	it('updates parent when child is updated', () => {
+	it('updates parent when child updates', () => {
 		const parent = writable(user);
 		const firstName = keyed(parent, 'name.first');
 		firstName.update(($firstName) => $firstName.toUpperCase());
@@ -228,32 +258,17 @@ describe('nested keyed object test', () => {
 		});
 	});
 
-	describe('undefined', () => {
-		it('handles undefined subscription', () => {
-			const parent = writable<User | undefined>(undefined);
-			const firstName = keyed(parent, 'name.first');
-			expect(get(firstName)).toBeUndefined();
+	describe('undefined and null', () => {
+		it('returns undefined child for undefined middle', () => {
+			const parent = writable<User | undefined>(user);
+			const friendName = keyed(parent, 'friend.name');
+			expect(get(friendName)).toBeUndefined();
 		});
 
-		it('handles undefined parent update', () => {
-			const parent = writable<User | undefined>(undefined);
-			const firstName = keyed(parent, 'name.first');
-			parent.update(($parent) => $parent);
-			expect(get(firstName)).toBeUndefined();
-		});
-
-		it('handles undefined parent child update', () => {
-			const parent = writable<User | undefined>(undefined);
-			const firstName = keyed(parent, 'name.first');
-			firstName.update(($firstName) => $firstName?.toUpperCase());
-			expect(get(parent)).toBeUndefined();
-		});
-
-		it('handles undefined parent child set', () => {
-			const parent = writable<User | undefined>(undefined);
-			const firstName = keyed(parent, 'name.first');
-			firstName.set('jane');
-			expect(get(parent)).toBeUndefined();
+		it('returns undefined child for null middle', () => {
+			const parent = writable<User | undefined>(user);
+			const partnerName = keyed(parent, 'partner.name');
+			expect(get(partnerName)).toBeUndefined();
 		});
 	});
 });

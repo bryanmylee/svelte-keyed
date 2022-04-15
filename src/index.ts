@@ -16,7 +16,7 @@ const getNested = (root: unknown, keyTokens: string[]): any => {
 	let current: any = root;
 	for (const key of keyTokens) {
 		if (current == null) {
-			break;
+			return undefined;
 		}
 		current = current[key];
 	}
