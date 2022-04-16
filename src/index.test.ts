@@ -87,7 +87,7 @@ describe('shallow keyed object test', () => {
 		expect(get(parent)).toStrictEqual({ ...user, age: 11 });
 	});
 
-	describe('undefined', () => {
+	describe('undefined and null', () => {
 		it('subscribes child to undefined when parent is undefined', () => {
 			const parent = writable<User | undefined>(undefined);
 			const age = keyed(parent, 'age');
@@ -114,18 +114,32 @@ describe('shallow keyed object test', () => {
 			expect(get(age)).toBeUndefined();
 		});
 
-		it('does not update parent when child updates', () => {
+		it('does not update undefined parent when child updates', () => {
 			const parent = writable<User | undefined>(undefined);
 			const age = keyed(parent, 'age');
 			age.update(($age) => ($age !== undefined ? $age + 1 : 0));
 			expect(get(parent)).toBeUndefined();
 		});
 
-		it('does not update parent when child is set', () => {
+		it('does not update undefined parent when child is set', () => {
 			const parent = writable<User | undefined>(undefined);
 			const age = keyed(parent, 'age');
 			age.set(10);
 			expect(get(parent)).toBeUndefined();
+		});
+
+		it('does not update null parent when child updates', () => {
+			const parent = writable<User | null>(null);
+			const age = keyed(parent, 'age');
+			age.update(($age) => ($age !== undefined ? $age + 1 : 0));
+			expect(get(parent)).toBeNull();
+		});
+
+		it('does not update null parent when child is set', () => {
+			const parent = writable<User | null>(null);
+			const age = keyed(parent, 'age');
+			age.set(10);
+			expect(get(parent)).toBeNull();
 		});
 	});
 });
@@ -190,18 +204,32 @@ describe('shallow keyed array test', () => {
 			expect(get(action)).toBeUndefined();
 		});
 
-		it('does not update parent when child updates', () => {
+		it('does not update undefined parent when child updates', () => {
 			const parent = writable<string[] | undefined>(undefined);
 			const action = keyed(parent, '[2]');
 			action.update(($action) => $action?.toUpperCase());
 			expect(get(parent)).toBeUndefined();
 		});
 
-		it('does not update parent when child is set', () => {
+		it('does not update undefined parent when child is set', () => {
 			const parent = writable<string[] | undefined>(undefined);
 			const action = keyed(parent, '[2]');
 			action.set('sleep');
 			expect(get(parent)).toBeUndefined();
+		});
+
+		it('does not update null parent when child updates', () => {
+			const parent = writable<string[] | null>(null);
+			const action = keyed(parent, '[2]');
+			action.update(($action) => $action?.toUpperCase());
+			expect(get(parent)).toBeNull();
+		});
+
+		it('does not update null parent when child is set', () => {
+			const parent = writable<string[] | null>(null);
+			const action = keyed(parent, '[2]');
+			action.set('sleep');
+			expect(get(parent)).toBeNull();
 		});
 	});
 });
