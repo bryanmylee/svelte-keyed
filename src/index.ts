@@ -57,7 +57,7 @@ export function keyed<Parent extends object, Path extends string>(
 	const set = (value: Get<Parent, Path>) => {
 		parent.update(($parent) => {
 			if ($parent == null) {
-				return undefined as unknown as Parent;
+				return $parent;
 			}
 			const newParent = Array.isArray($parent)
 				? [...$parent]
@@ -70,7 +70,7 @@ export function keyed<Parent extends object, Path extends string>(
 	const update = (fn: Updater<Get<Parent, Path>>) => {
 		parent.update(($parent) => {
 			if ($parent == null) {
-				return undefined as unknown as Parent;
+				return $parent;
 			}
 			const newValue = fn(getNested($parent, keyTokens));
 			const newParent = Array.isArray($parent)
