@@ -1,6 +1,6 @@
 {
 	"name": "svelte-keyed",
-	"version": "1.1.4",
+	"version": "1.1.5",
 	"description": "A writable derived store for objects and arrays",
 	"main": "dist/index.js",
 	"module": "dist/index.es.js",
@@ -26,7 +26,7 @@
 		"rxjs"
 	],
 	"author": "Bryan Lee",
-	"license": "ISC",
+	"license": "MIT",
 	"bugs": {
 		"url": "https://github.com/bryanmylee/svelte-keyed/issues"
 	},
