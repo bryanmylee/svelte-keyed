@@ -86,7 +86,6 @@ keyed(user, '...');
             │ • name                        │
             │ • name.first                  │
             │ • name.last                   │
-            │ • name                        │
             │ • relations                   │
             │ • relations.partner           │
             │ • relations.partner.name      │
