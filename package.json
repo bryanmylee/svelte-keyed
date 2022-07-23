@@ -1,6 +1,6 @@
 {
 	"name": "svelte-keyed",
-	"version": "1.1.5",
+	"version": "1.1.6",
 	"description": "A writable derived store for objects and arrays",
 	"main": "dist/index.js",
 	"module": "dist/index.es.js",
@@ -32,7 +32,7 @@
 	},
 	"homepage": "https://github.com/bryanmylee/svelte-keyed#readme",
 	"peerDependencies": {
-		"svelte": "^3.44.2"
+		"svelte": "^3.49.0"
 	},
 	"devDependencies": {
 		"@rollup/plugin-typescript": "^5.0.2",
