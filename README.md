@@ -5,7 +5,7 @@
 [![npm version](http://img.shields.io/npm/v/svelte-keyed.svg)](https://www.npmjs.com/package/svelte-keyed)
 [![npm downloads](https://img.shields.io/npm/dm/svelte-keyed.svg)](https://www.npmjs.com/package/svelte-keyed)
 ![license](https://img.shields.io/npm/l/svelte-keyed)
-![build](https://img.shields.io/github/workflow/status/bryanmylee/svelte-keyed/publish)
+![build](https://img.shields.io/github/actions/workflow/status/bryanmylee/svelte-keyed/publish.yml)
 [![coverage](https://coveralls.io/repos/github/bryanmylee/svelte-keyed/badge.svg?branch=main)](https://coveralls.io/github/bryanmylee/svelte-keyed?branch=main)
 [![size](https://img.shields.io/bundlephobia/min/svelte-keyed)](https://bundlephobia.com/result?p=svelte-keyed)
 
