@@ -32,7 +32,7 @@
 	},
 	"homepage": "https://github.com/bryanmylee/svelte-keyed#readme",
 	"peerDependencies": {
-		"svelte": "^3.49.0"
+		"svelte": "^3.49.0 || ^4"
 	},
 	"devDependencies": {
 		"@rollup/plugin-typescript": "^5.0.2",
