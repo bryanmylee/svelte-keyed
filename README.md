@@ -44,13 +44,13 @@ If the parent store is nullable, then the child store will also be nullable.
 
 ```ts
 type User = {
-	name: {
-		first: string;
-		last: string;
-	};
-	relations: {
-		partner?: User;
-	};
+  name: {
+    first: string;
+    last: string;
+  };
+  relations: {
+    partner?: User;
+  };
 };
 
 const maybeUser = writable<User | undefined>(undefined);
@@ -152,14 +152,14 @@ One important method to reduce clutter on your component is to extract functiona
 
 ```js
 export const trackClicks = (node, clicks) => {
-	const listen = () => {
-		clicks.update(($clicks) => $clicks + 1);
-	};
-	node.addEventListener('click', listen);
-	return {
-		destroy() {
-			node.removeEventListener('click', listen);
-		},
-	};
+  const listen = () => {
+    clicks.update(($clicks) => $clicks + 1);
+  };
+  node.addEventListener('click', listen);
+  return {
+    destroy() {
+      node.removeEventListener('click', listen);
+    },
+  };
 };
 ```
