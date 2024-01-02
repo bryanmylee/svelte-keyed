@@ -5,6 +5,9 @@ export default defineConfig({
 	plugins: [sveltekit()],
 	test: {
 		globals: true,
-		coverage: { reporter: 'lcov' },
+		coverage: {
+			reporter: 'lcov',
+			include: ['**.ts'],
+		},
 	},
 });
