@@ -1,5 +1,5 @@
 import { get, writable } from 'svelte/store';
-import { getTokens, keyed } from '.';
+import { getTokens, keyed } from './index.js';
 
 interface User {
 	name: Name;
@@ -15,11 +15,18 @@ interface Name {
 }
 
 class UserC {
-	constructor(public name: NameC, public email: string, public age: number) {}
+	constructor(
+		public name: NameC,
+		public email: string,
+		public age: number,
+	) {}
 }
 
 class NameC {
-	constructor(public first: string, public last: string) {}
+	constructor(
+		public first: string,
+		public last: string,
+	) {}
 }
 
 describe('get tokens', () => {
@@ -166,7 +173,7 @@ describe('shallow keyed array test', () => {
 	it('updates parent when child is updated', () => {
 		const parent = writable(actions);
 		const action = keyed(parent, '[2]');
-		action.update(($action) => $action.toUpperCase());
+		action.update(($action) => $action!.toUpperCase());
 		expect(get(parent)).toStrictEqual(['eat', 'sleep', 'CODE', 'repeat']);
 	});
 
